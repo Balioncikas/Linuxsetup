@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linux Setup Guide — Fedora & Arch</title>
+<title>Linux Setup Guide</title>
 <style>
   :root {
     --bg: #0d0f13;
@@ -19,6 +19,9 @@
     --warn-bg: #3a2412;
     --warn-border: #f2924b;
     --warn-label: #f2924b;
+    --info-bg: #142a3a;
+    --info-border: #4fb8e6;
+    --info-label: #4fb8e6;
   }
   * { box-sizing: border-box; }
   body {
@@ -67,10 +70,11 @@
   .nav-single a:hover { opacity: 1; }
   .nav-single a.active { background: var(--accent-soft); opacity: 1; font-weight: 700; }
 
-  main { flex: 1; max-width: 820px; padding: 40px 32px 100px; }
+  main { flex: 1; max-width: 840px; padding: 40px 32px 100px; }
   h1 { font-size: 2rem; margin-bottom: 6px; }
   h2 { font-size: 1.4rem; margin-top: 0; }
-  h3 { font-size: 1.05rem; color: var(--accent); margin-top: 26px; }
+  h3 { font-size: 1.08rem; color: var(--accent); margin-top: 28px; }
+  h4 { font-size: 0.95rem; color: var(--text); margin-top: 18px; margin-bottom: 4px; }
   p, li { line-height: 1.65; color: #d3d7dc; }
   code {
     background: #1c2028; border: 1px solid var(--border);
@@ -94,6 +98,18 @@
   }
   .callout.warn { border-left-color: var(--warn-border); background: var(--warn-bg); }
   .callout.warn .label { color: var(--warn-label); }
+  .callout.info { border-left-color: var(--info-border); background: var(--info-bg); }
+  .callout.info .label { color: var(--info-label); }
+
+  .app-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 18px 0;
+    background: #14171d;
+  }
+  .app-card h4 { margin-top: 0; color: var(--accent); font-size: 1rem; }
+  .app-card .tagline { color: var(--muted); font-size: 0.85rem; margin: 2px 0 10px; }
 
   .support-btn {
     position: fixed; left: 16px; bottom: 16px;
@@ -105,8 +121,6 @@
   .distro-pane.active { display: flex; }
   .section { display: none; }
   .section.active { display: block; }
-
-  .step-divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
 </style>
 </head>
 <body>
@@ -118,20 +132,137 @@
 </header>
 
 <div class="distro-tabs">
-  <div class="distro-tab active" data-distro="fedora">Fedora</div>
+  <div class="distro-tab active" data-distro="basics">Linux Basics</div>
+  <div class="distro-tab" data-distro="fedora">Fedora</div>
   <div class="distro-tab" data-distro="arch">Arch</div>
 </div>
 
+<!-- ================= BASICS ================= -->
+<div class="layout distro-pane active" id="pane-basics">
+  <nav class="sidebar">
+    <div class="nav-single"><a href="#" data-target="basics-welcome" class="active">Overview</a></div>
+    <div class="nav-single"><a href="#" data-target="basics-terminal">Terminal & sudo</a></div>
+    <div class="nav-single"><a href="#" data-target="basics-pkg">Package managers</a></div>
+    <div class="nav-single"><a href="#" data-target="basics-flatpak">Flatpak vs native</a></div>
+    <div class="nav-single"><a href="#" data-target="basics-fs">Where things live</a></div>
+    <div class="nav-single"><a href="#" data-target="basics-updates">Staying updated</a></div>
+    <a class="support-btn" href="#">☕ Support Me on Ko-fi</a>
+  </nav>
+  <main>
+    <section class="section active" id="basics-welcome">
+      <h1>Linux Basics</h1>
+      <p>This page is a short primer on the concepts you'll run into constantly in the Fedora and
+      Arch tabs. If you already know your way around a terminal, feel free to skip straight to
+      your distro's tab — this is here for whenever you need it.</p>
+      <div class="callout info">
+        <span class="label">Why this matters</span>
+        Every command in this guide assumes you understand roughly what it's doing. Nothing here
+        will make you an expert overnight, but it removes the "am I about to break something"
+        feeling that copy-pasting blind gives you.
+      </div>
+    </section>
+
+    <section class="section" id="basics-terminal">
+      <h2>Terminal & sudo</h2>
+      <p>The <strong>terminal</strong> is a text window where you type commands instead of clicking.
+      It looks intimidating at first, but it's just a more direct way of telling your computer what
+      to do — nothing typed here is inherently more dangerous than clicking buttons, it's just less
+      forgiving of typos.</p>
+      <h3>sudo</h3>
+      <p><code>sudo</code> stands for "superuser do." Normal actions run with your regular user
+      permissions, which can't touch core system files — that's a safety feature. <code>sudo</code>
+      temporarily grants a single command administrator rights, the same way Windows asks "Allow this
+      app to make changes?" You'll be asked for your password the first time in a while.</p>
+      <div class="callout warn">
+        <span class="label">Rule of thumb</span>
+        Only run <code>sudo</code> commands you understand, and only from sources you trust. It can
+        modify or delete anything on the system if told to.
+      </div>
+      <h3>Common flags you'll see</h3>
+      <ul>
+        <li><code>-y</code> — auto-answers "yes" to prompts, so the command doesn't stop and wait for you</li>
+        <li><code>-S</code> — used by pacman/yay to mean "sync/install a package"</li>
+        <li><code>-R</code> — used by pacman to mean "remove a package"</li>
+      </ul>
+    </section>
+
+    <section class="section" id="basics-pkg">
+      <h2>Package managers</h2>
+      <p>A package manager installs, updates, and removes software for you — instead of downloading
+      random installers off the internet, you ask the package manager for a program by name and it
+      handles the rest, including dependencies.</p>
+      <ul>
+        <li><strong>Fedora</strong> uses <code>dnf</code> — installs from Fedora's official repositories.</li>
+        <li><strong>Arch</strong> uses <code>pacman</code> for official packages, plus the
+        <strong>AUR</strong> (Arch User Repository) for community-submitted ones, accessed through a
+        helper like <code>yay</code>.</li>
+      </ul>
+      <div class="callout info">
+        <span class="label">Why the AUR needs a "helper"</span>
+        AUR packages are just build recipes, not ready-made binaries — <code>yay</code> downloads the
+        recipe, compiles it, and installs it, so it feels the same as installing an official package.
+      </div>
+    </section>
+
+    <section class="section" id="basics-flatpak">
+      <h2>Flatpak vs native packages</h2>
+      <p><strong>Flatpak</strong> is a universal app format that works the same way on any distro —
+      the app runs in a sandbox, bundling most of its own dependencies instead of relying on your
+      system's. <strong>Flathub</strong> is the main store/repository of Flatpak apps.</p>
+      <table style="width:100%; border-collapse: collapse; margin: 14px 0;">
+        <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 0; color:var(--accent); font-weight:600;">Native package (dnf/pacman)</td><td style="padding:8px 0; color:var(--accent); font-weight:600;">Flatpak</td></tr>
+        <tr><td style="padding:6px 0;">Tightly integrated with the system</td><td style="padding:6px 0;">Sandboxed, isolated from the system</td></tr>
+        <tr><td style="padding:6px 0;">Smaller download (shares system libraries)</td><td style="padding:6px 0;">Larger download (bundles its own libraries)</td></tr>
+        <tr><td style="padding:6px 0;">Same version across all apps</td><td style="padding:6px 0;">Each app can use its own library versions</td></tr>
+      </table>
+      <p>Neither is "better" — this guide uses whichever is more reliable for a given app, and
+      says so explicitly each time.</p>
+    </section>
+
+    <section class="section" id="basics-fs">
+      <h2>Where things live</h2>
+      <p>A few folders worth knowing by name:</p>
+      <ul>
+        <li><code>~</code> or <code>/home/yourname</code> — your personal folder, same idea as
+        <code>C:\Users\yourname</code> on Windows</li>
+        <li><code>/etc</code> — system-wide configuration files</li>
+        <li><code>/usr/bin</code> — where most installed programs actually live</li>
+        <li><code>~/.config</code> — where most apps store their personal settings</li>
+      </ul>
+    </section>
+
+    <section class="section" id="basics-updates">
+      <h2>Staying updated</h2>
+      <p>Unlike Windows, updates on Linux are usually one command and don't force a restart mid-task.
+      Still, get in the habit of running them regularly — outdated systems are the most common cause
+      of "why won't this install" problems.</p>
+      <pre><code># Fedora
+sudo dnf update -y
+
+# Arch
+sudo pacman -Syu</code></pre>
+      <div class="callout warn">
+        <span class="label">Kernel updates</span>
+        If an update includes a new kernel, reboot before installing anything else — especially
+        GPU drivers, which are tied to the exact kernel version.
+      </div>
+    </section>
+  </main>
+</div>
+
 <!-- ================= FEDORA ================= -->
-<div class="layout distro-pane active" id="pane-fedora">
+<div class="layout distro-pane" id="pane-fedora">
   <nav class="sidebar">
     <div class="nav-single"><a href="#" data-target="fedora-welcome" class="active">Overview</a></div>
     <div class="nav-single"><a href="#" data-target="fedora-firstboot">Right After Install</a></div>
-    <div class="nav-single"><a href="#" data-target="fedora-gpu">Graphics Drivers</a></div>
+    <div class="nav-single"><a href="#" data-target="fedora-nvidia">NVIDIA Drivers</a></div>
+    <div class="nav-single"><a href="#" data-target="fedora-amdintel">AMD & Intel Drivers</a></div>
     <div class="nav-single"><a href="#" data-target="fedora-media">Video & Codecs</a></div>
-    <div class="nav-single"><a href="#" data-target="fedora-steam">Steam & Proton-GE</a></div>
+    <div class="nav-single"><a href="#" data-target="fedora-steam">Steam</a></div>
+    <div class="nav-single"><a href="#" data-target="fedora-protonplus">ProtonPlus</a></div>
     <div class="nav-single"><a href="#" data-target="fedora-perf">GameMode & MangoHud</a></div>
     <div class="nav-single"><a href="#" data-target="fedora-lutris">Lutris</a></div>
+    <div class="nav-single"><a href="#" data-target="fedora-launchers">Heroic & Bottles</a></div>
     <div class="nav-single"><a href="#" data-target="fedora-tools">Extra Tools</a></div>
     <a class="support-btn" href="#">☕ Support Me on Ko-fi</a>
   </nav>
@@ -139,30 +270,25 @@
 
     <section class="section active" id="fedora-welcome">
       <h1>Gaming on Fedora</h1>
-      <p>This walks through everything worth doing on a fresh Fedora install before you start gaming.
-      Go top to bottom in the sidebar the first time — each page explains <strong>what the commands
-      do and why</strong>, so you're never just copy-pasting blind.</p>
-      <div class="callout">
-        <span class="label">Quick command heads-up</span>
-        <code>sudo</code> means "run as administrator" — you'll be asked for your password.
-        The <code>-y</code> flag auto-confirms prompts so you don't have to press Enter a bunch of times.
-      </div>
+      <p>Everything worth doing on a fresh Fedora install before you start gaming, in the order to
+      do it. Every section explains what a command does and why it's there — check the
+      <strong>Linux Basics</strong> tab first if terms like <code>sudo</code> or "repository" are new.</p>
       <div class="callout warn">
         <span class="label">Before you copy-paste anything</span>
-        Read each command before running it. None of this is dangerous if followed in order, but
+        Read each command before running it. Nothing here is dangerous if followed in order, but
         understanding what a line does before running it is a good habit on any system.
       </div>
     </section>
 
     <section class="section" id="fedora-firstboot">
       <h2>Right After Install</h2>
-      <p>These four steps come first because almost everything later (drivers, codecs, extra apps)
-      depends on them being done.</p>
+      <p>These four steps come first because almost everything later — drivers, codecs, extra
+      apps — depends on them.</p>
 
       <h3>1. Enable RPM Fusion</h3>
-      <p>Fedora ships very minimal by default for legal/licensing reasons — RPM Fusion is the
-      repository that unlocks the software Fedora can't include out of the box, like NVIDIA drivers
-      and video codecs. Almost every step later in this guide needs it.</p>
+      <p>Fedora ships very minimal by default for legal/licensing reasons. RPM Fusion is a
+      third-party repository that unlocks the software Fedora can't include out of the box —
+      NVIDIA drivers, some codecs, and more. Almost every later step needs it.</p>
       <pre><code># Free repo — most stuff you need
 sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 
@@ -172,43 +298,81 @@ sudo dnf install -y https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfr
 # Sync it all up
 sudo dnf group upgrade core -y
 sudo dnf check-update</code></pre>
+      <div class="callout info">
+        <span class="label">Free vs nonfree, quickly</span>
+        <strong>Free</strong> = open-source software Fedora can legally redistribute.
+        <strong>Nonfree</strong> = proprietary software (NVIDIA drivers, certain codecs) Fedora can't
+        ship by default due to licensing.
+      </div>
 
       <h3>2. Update everything</h3>
-      <p>Fresh installs almost always ship with slightly outdated packages. Updating first avoids
-      installing drivers or games against outdated system libraries.</p>
+      <p>Fresh installs almost always ship slightly outdated. Updating first avoids installing
+      drivers or games against outdated system libraries.</p>
       <pre><code>sudo dnf update -y
 # If it updated the kernel, reboot before continuing:
 sudo reboot</code></pre>
 
       <h3>3. Update firmware</h3>
-      <p>This is your hardware's own firmware (not the OS) — GPU, motherboard, SSD, etc. Newer
-      firmware can fix stability issues and even affect gaming performance.</p>
+      <p>This is your hardware's own firmware — GPU, motherboard, SSD — not the OS. Newer firmware
+      can fix stability issues and even affect gaming performance.</p>
       <pre><code>sudo fwupdmgr get-devices
 sudo fwupdmgr refresh --force
 sudo fwupdmgr get-updates
 sudo fwupdmgr update</code></pre>
       <div class="callout warn">
         <span class="label">Reboot required</span>
-        If any firmware updated, reboot before moving on — there's no way around this one.
+        If any firmware updated, reboot before moving on.
       </div>
 
       <h3>4. Set up Flathub</h3>
-      <p>Fedora includes a limited, curated version of Flatpak by default. Flathub is the real,
-      full app store behind it — several gaming tools later in this guide (like Steam's Flatpak
-      version) come from here.</p>
+      <p>Fedora includes a limited, curated version of Flatpak by default. Flathub is the real, full
+      app store behind it — several apps later in this guide (Steam's Flatpak build, ProtonPlus,
+      Heroic, Bottles) come from here.</p>
       <pre><code>flatpak remote-delete fedora
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak update --appstream</code></pre>
     </section>
 
-    <section class="section" id="fedora-gpu">
-      <h2>Graphics Drivers</h2>
-      <p>The right GPU driver is the single biggest factor in how well games run. Pick the section
-      for your hardware.</p>
+    <section class="section" id="fedora-nvidia">
+      <h2>NVIDIA Drivers</h2>
+      <div class="callout warn">
+        <span class="label">Read this before starting</span>
+        NVIDIA on Linux takes more steps than AMD/Intel, and it's the step most likely to cause a
+        black screen if rushed. Disable Secure Boot in your BIOS first (or learn to sign kernel
+        modules yourself), and make sure you've already updated + rebooted.
+      </div>
+      <pre><code># Kernel headers and build tools the driver needs to compile
+sudo dnf install -y kernel-devel kernel-headers gcc make dkms acpid \
+  libglvnd-glx libglvnd-opengl libglvnd-devel pkgconfig</code></pre>
+      <p><strong>RTX 4000-series or newer only:</strong> Fedora needs one extra setting so it builds
+      the open-source kernel module correctly.</p>
+      <pre><code>sudo sh -c 'echo "%_with_kmod_nvidia_open 1" > /etc/rpm/macros.nvidia-kmod'</code></pre>
+      <p>Now install the driver itself:</p>
+      <pre><code>sudo dnf install -y akmod-nvidia xorg-x11-drv-nvidia-cuda</code></pre>
+      <p>This compiles the driver in the background and takes 5–15 minutes. Watch progress with:</p>
+      <pre><code>sudo journalctl -f -u akmods</code></pre>
+      <p>Once it's done, reboot and confirm it worked:</p>
+      <pre><code>sudo reboot
+nvidia-smi</code></pre>
+      <p>If <code>nvidia-smi</code> shows your GPU info, you're done. If not:</p>
+      <pre><code>sudo akmods --force --kernels $(uname -r)
+sudo reboot</code></pre>
+      <div class="callout warn">
+        <span class="label">Stuck at a black screen or 800×600?</span>
+        Boot into an older kernel from GRUB's "Advanced Options," then run
+        <code>sudo akmods --kernels $(uname -r) --rebuild</code> and reboot. Still broken? Check
+        <code>sudo journalctl -u akmods</code> and <code>dmesg | grep -i nvidia</code> for the
+        actual failure.
+      </div>
+      <p>After future kernel updates, NVIDIA sometimes needs a manual rebuild:</p>
+      <pre><code>sudo akmods --kernels $(uname -r) --rebuild
+sudo reboot</code></pre>
+    </section>
 
-      <h3>AMD & Intel — the easy ones</h3>
+    <section class="section" id="fedora-amdintel">
+      <h2>AMD & Intel Drivers</h2>
       <p>These generally work out of the box, but installing the full Mesa/Vulkan stack makes sure
-      you're not missing anything games need.</p>
+      nothing games need is missing.</p>
       <pre><code># Both AMD & Intel
 sudo dnf install -y mesa-dri-drivers mesa-vulkan-drivers vulkan-loader mesa-libGLU
 
@@ -220,100 +384,118 @@ sudo dnf install -y intel-media-driver
 
 # Intel, older GPUs
 sudo dnf install -y libva-intel-driver</code></pre>
-      <p>That's it — no extra setup needed for AMD or Intel.</p>
-
-      <h3>NVIDIA — more involved, but manageable</h3>
-      <div class="callout warn">
-        <span class="label">Read this before starting</span>
-        NVIDIA on Linux takes more steps than AMD/Intel. Disable Secure Boot in your BIOS first
-        (or learn to sign kernel modules yourself if you want to keep it on), and make sure you've
-        already done the update + reboot from the previous page.
-      </div>
-      <pre><code># Kernel headers and build tools the driver needs to compile
-sudo dnf install -y kernel-devel kernel-headers gcc make dkms acpid \
-  libglvnd-glx libglvnd-opengl libglvnd-devel pkgconfig</code></pre>
-      <p><strong>RTX 4000-series or newer only:</strong> Fedora needs one extra setting so it builds
-      the open-source kernel module correctly.</p>
-      <pre><code>sudo sh -c 'echo "%_with_kmod_nvidia_open 1" > /etc/rpm/macros.nvidia-kmod'</code></pre>
-      <p>Now install the driver itself:</p>
-      <pre><code>sudo dnf install -y akmod-nvidia xorg-x11-drv-nvidia-cuda</code></pre>
-      <p>This step compiles the driver in the background and takes 5–15 minutes. You can watch its
-      progress with:</p>
-      <pre><code>sudo journalctl -f -u akmods</code></pre>
-      <p>Once it's done, reboot, then confirm it worked:</p>
-      <pre><code>sudo reboot
-nvidia-smi</code></pre>
-      <p>If <code>nvidia-smi</code> shows your GPU info, you're done. If not:</p>
-      <pre><code>sudo akmods --force --kernels $(uname -r)
-sudo reboot</code></pre>
-      <div class="callout warn">
-        <span class="label">Stuck at a black screen or 800×600?</span>
-        Boot into an older kernel from the GRUB "Advanced Options" menu, then run
-        <code>sudo akmods --kernels $(uname -r) --rebuild</code> and reboot. If it's still broken,
-        check <code>sudo journalctl -u akmods</code> and <code>dmesg | grep -i nvidia</code> for
-        what actually failed.
-      </div>
-      <p>After future kernel updates, NVIDIA sometimes needs a manual rebuild:</p>
-      <pre><code>sudo akmods --kernels $(uname -r) --rebuild
-sudo reboot</code></pre>
+      <p>That's genuinely it — no extra setup needed for AMD or Intel.</p>
     </section>
 
     <section class="section" id="fedora-media">
       <h2>Video & Codecs</h2>
       <p>Fedora ships with almost no media codecs by default due to licensing. Games and launchers
-      that show embedded video (trailers, cutscenes, streaming overlays) need this to actually play
-      anything.</p>
+      that show embedded video — trailers, cutscenes, streaming overlays — need this to play
+      anything at all.</p>
       <pre><code>sudo dnf4 group install multimedia
 sudo dnf swap 'ffmpeg-free' 'ffmpeg' --allowerasing
 sudo dnf upgrade @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
 sudo dnf group install -y sound-and-video</code></pre>
-
       <h3>Hardware acceleration</h3>
-      <p>This lets your GPU handle video decoding instead of your CPU doing all the work — matters
-      if you're recording or streaming gameplay.</p>
+      <p>Lets your GPU handle video decoding instead of your CPU doing all the work — matters if
+      you record or stream gameplay.</p>
       <pre><code>sudo dnf install -y ffmpeg-libs libva libva-utils</code></pre>
       <p><strong>NVIDIA users, also run:</strong></p>
       <pre><code>sudo dnf install -y libva-nvidia-driver</code></pre>
     </section>
 
     <section class="section" id="fedora-steam">
-      <h2>Steam & Proton-GE</h2>
-      <p><a href="https://store.steampowered.com/">Steam</a> is the main way you'll play Windows
-      games on Linux, thanks to Proton (Valve's Windows compatibility layer built on Wine).</p>
-      <pre><code>sudo dnf install -y steam</code></pre>
-      <p>That's genuinely it for most games — many just work with Steam's built-in Proton.</p>
+      <h2>Steam</h2>
+      <div class="app-card">
+        <h4>Steam</h4>
+        <p class="tagline">The main store and launcher for PC gaming on Linux</p>
+        <p>Steam bundles <strong>Proton</strong>, Valve's compatibility layer built on Wine, which
+        translates Windows game calls into something Linux understands. Most Windows-only games on
+        your library will just work once Steam is installed — no extra setup.</p>
+        <pre><code>sudo dnf install -y steam</code></pre>
+      </div>
       <div class="callout warn">
         <span class="label">Newer NVIDIA GPU + Steam won't launch?</span>
-        This is usually missing dependencies in the RPM version. Switch to the Flatpak build instead:
+        Usually missing dependencies in the RPM build. Switch to the Flatpak version instead:
         <pre><code>sudo dnf remove steam
 flatpak install -y flathub com.valvesoftware.Steam</code></pre>
       </div>
-      <h3>Proton-GE — for extra compatibility</h3>
-      <p>Proton-GE is a community build of Proton with extra fixes for games that don't run well on
-      Valve's stock version. Install it through ProtonUp-Qt, then pick it per-game in
-      Steam → right-click the game → Properties → Compatibility.</p>
-      <pre><code>flatpak install flathub net.davidotek.pupgui2</code></pre>
+    </section>
+
+    <section class="section" id="fedora-protonplus">
+      <h2>ProtonPlus</h2>
+      <div class="app-card">
+        <h4>ProtonPlus</h4>
+        <p class="tagline">Installs and manages extra Proton, Wine, and DXVK/VKD3D builds</p>
+        <p>Steam's built-in Proton doesn't cover every game. <strong>ProtonPlus</strong> is a modern
+        GTK app that installs community-maintained compatibility tools — most importantly
+        <strong>Proton-GE</strong> (a Proton build with extra game-specific fixes) — and manages
+        updates for them from one place. It's the actively-maintained successor to the older
+        ProtonUp-Qt tool.</p>
+        <pre><code>flatpak install flathub com.vysp3r.ProtonPlus
+# Fedora also offers it via COPR:
+sudo dnf -y copr enable wehagy/protonplus
+sudo dnf install protonplus</code></pre>
+        <h4>Using it</h4>
+        <p>Open ProtonPlus → install a Proton-GE build → in Steam, right-click a game →
+        Properties → Compatibility → tick "Force the use of a specific Steam Play compatibility
+        tool" → select the GE build you installed.</p>
+      </div>
     </section>
 
     <section class="section" id="fedora-perf">
       <h2>GameMode & MangoHud</h2>
-      <p><strong>GameMode</strong> automatically tunes your CPU/GPU governor for performance while a
-      game runs, then reverts it when you close the game. <strong>MangoHud</strong> is an on-screen
-      overlay showing FPS, CPU/GPU temps, and frame times — useful for spotting bottlenecks.</p>
+      <div class="app-card">
+        <h4>GameMode</h4>
+        <p class="tagline">Auto-tunes your system for performance while a game runs</p>
+        <p>GameMode temporarily switches your CPU governor to performance mode, and can adjust
+        other system settings, only while a game is running — then reverts automatically when you
+        quit. Zero configuration needed for the basic benefit.</p>
+      </div>
+      <div class="app-card">
+        <h4>MangoHud</h4>
+        <p class="tagline">On-screen overlay: FPS, CPU/GPU temps, frame times</p>
+        <p>Useful for actually seeing whether a setting change helped, or spotting whether a game
+        is CPU-bound or GPU-bound.</p>
+      </div>
       <pre><code>sudo dnf install -y gamemode mangohud</code></pre>
-      <p>Add this to a game's Steam launch options (right-click game → Properties → Launch Options)
-      to enable both at once:</p>
+      <p>Add this to a game's Steam launch options (right-click game → Properties → Launch
+      Options) to enable both at once:</p>
       <pre><code>gamemoderun mangohud %command%</code></pre>
     </section>
 
     <section class="section" id="fedora-lutris">
       <h2>Lutris</h2>
-      <p><a href="https://lutris.net/">Lutris</a> handles everything Steam doesn't: Battle.net,
-      Epic Games, GOG, emulators, and older titles. It manages Wine prefixes for you and runs
-      community install scripts so you're not hand-configuring each game.</p>
-      <pre><code>sudo dnf install -y lutris
-# or, the Flatpak version:
+      <div class="app-card">
+        <h4>Lutris</h4>
+        <p class="tagline">Manages everything Steam doesn't</p>
+        <p>Battle.net, Epic, GOG, older Windows titles, and emulators. Lutris manages the Wine
+        prefix for you and runs community-submitted install scripts, so you're not hand-configuring
+        each game from scratch.</p>
+        <pre><code>sudo dnf install -y lutris
+# or the Flatpak version:
 flatpak install -y flathub net.lutris.Lutris</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="fedora-launchers">
+      <h2>Heroic & Bottles</h2>
+      <div class="app-card">
+        <h4>Heroic Games Launcher</h4>
+        <p class="tagline">Native-feeling launcher for Epic Games Store and GOG</p>
+        <p>If most of your non-Steam library is Epic or GOG specifically, Heroic gives a cleaner,
+        purpose-built interface than Lutris for just those two stores — library view, cloud saves,
+        and per-game Proton/Wine settings.</p>
+        <pre><code>flatpak install -y flathub com.heroicgameslauncher.hgl</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>Bottles</h4>
+        <p class="tagline">Isolated Wine "bottles" for individual Windows apps and games</p>
+        <p>Each "bottle" is a separate, sandboxed Wine environment — so a tweak or install for one
+        game can't break another. Handy for older or oddball Windows programs that don't have a
+        Steam/Epic/GOG install at all.</p>
+        <pre><code>flatpak install -y flathub com.usebottles.bottles</code></pre>
+      </div>
     </section>
 
     <section class="section" id="fedora-tools">
@@ -321,8 +503,8 @@ flatpak install -y flathub net.lutris.Lutris</code></pre>
       <p>Small utilities that come up constantly once you're actually using the system day to day.</p>
 
       <h3>Archive support</h3>
-      <p>Sooner or later you'll need to open a <code>.rar</code> — game mod archives especially love
-      this format.</p>
+      <p>Sooner or later you'll need to open a <code>.rar</code> — game mod archives especially
+      love this format.</p>
       <pre><code>sudo dnf install -y p7zip p7zip-plugins unrar btop</code></pre>
 
       <h3>AppImage support</h3>
@@ -346,11 +528,14 @@ sudo dnf autoremove -y</code></pre>
   <nav class="sidebar">
     <div class="nav-single"><a href="#" data-target="arch-welcome" class="active">Overview</a></div>
     <div class="nav-single"><a href="#" data-target="arch-firstboot">Right After Install</a></div>
-    <div class="nav-single"><a href="#" data-target="arch-gpu">Graphics Drivers</a></div>
+    <div class="nav-single"><a href="#" data-target="arch-nvidia">NVIDIA Drivers</a></div>
+    <div class="nav-single"><a href="#" data-target="arch-amdintel">AMD & Intel Drivers</a></div>
     <div class="nav-single"><a href="#" data-target="arch-media">Video & Codecs</a></div>
-    <div class="nav-single"><a href="#" data-target="arch-steam">Steam & Proton-GE</a></div>
+    <div class="nav-single"><a href="#" data-target="arch-steam">Steam</a></div>
+    <div class="nav-single"><a href="#" data-target="arch-protonplus">ProtonPlus</a></div>
     <div class="nav-single"><a href="#" data-target="arch-perf">GameMode & MangoHud</a></div>
     <div class="nav-single"><a href="#" data-target="arch-lutris">Lutris</a></div>
+    <div class="nav-single"><a href="#" data-target="arch-launchers">Heroic & Bottles</a></div>
     <div class="nav-single"><a href="#" data-target="arch-tools">Extra Tools</a></div>
     <a class="support-btn" href="#">☕ Support Me on Ko-fi</a>
   </nav>
@@ -358,13 +543,8 @@ sudo dnf autoremove -y</code></pre>
 
     <section class="section active" id="arch-welcome">
       <h1>Gaming on Arch</h1>
-      <p>Same idea as the Fedora side, adapted to <code>pacman</code> and the AUR. Go top to bottom
-      the first time through.</p>
-      <div class="callout">
-        <span class="label">Quick command heads-up</span>
-        <code>sudo</code> runs a command as administrator. <code>yay</code> is an AUR helper —
-        it lets you install community packages the same way you install official ones.
-      </div>
+      <p>Same shape as the Fedora tab, adapted to <code>pacman</code> and the AUR. Check the
+      <strong>Linux Basics</strong> tab if terms like "AUR helper" or "multilib" are new.</p>
       <div class="callout warn">
         <span class="label">Before you copy-paste anything</span>
         Read each command before running it — especially anything touching drivers or the bootloader.
@@ -386,25 +566,19 @@ sudo dnf autoremove -y</code></pre>
 sudo pacman -Sy</code></pre>
 
       <h3>3. Install an AUR helper</h3>
-      <p>The AUR (Arch User Repository) hosts community packages that aren't in the official repos —
-      Proton-GE's installer and a few gaming tools live here.</p>
+      <p>The AUR hosts community packages not in the official repos — ProtonPlus and a few gaming
+      tools live here. <code>yay</code> wraps the build process so installing from the AUR feels
+      the same as installing an official package.</p>
       <pre><code>sudo pacman -S --needed git base-devel
 git clone https://aur.archlinux.org/yay.git
 cd yay && makepkg -si</code></pre>
     </section>
 
-    <section class="section" id="arch-gpu">
-      <h2>Graphics Drivers</h2>
-
-      <h3>AMD & Intel — the easy ones</h3>
-      <p>Open-source Mesa drivers handle both well out of the box.</p>
-      <pre><code>sudo pacman -S mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon   # AMD
-sudo pacman -S mesa lib32-mesa vulkan-intel lib32-vulkan-intel     # Intel</code></pre>
-
-      <h3>NVIDIA — more involved, but manageable</h3>
+    <section class="section" id="arch-nvidia">
+      <h2>NVIDIA Drivers</h2>
       <div class="callout warn">
         <span class="label">Read this before starting</span>
-        Disable Secure Boot in your BIOS first, and make sure you've updated and rebooted already.
+        Disable Secure Boot in your BIOS first, and make sure you've already updated and rebooted.
       </div>
       <pre><code>sudo pacman -S nvidia nvidia-utils lib32-nvidia-utils nvidia-settings</code></pre>
       <p>Reboot, then confirm it worked:</p>
@@ -412,16 +586,26 @@ sudo pacman -S mesa lib32-mesa vulkan-intel lib32-vulkan-intel     # Intel</code
 nvidia-smi</code></pre>
       <div class="callout warn">
         <span class="label">Using a custom kernel (e.g. linux-zen)?</span>
-        Install the matching headers package (<code>linux-zen-headers</code>, etc.) and the
-        matching <code>nvidia-dkms</code> package instead of plain <code>nvidia</code>, so the
-        driver rebuilds automatically on kernel updates.
+        Install the matching headers package (<code>linux-zen-headers</code>, etc.) and the matching
+        <code>nvidia-dkms</code> package instead of plain <code>nvidia</code>, so the driver rebuilds
+        automatically on kernel updates.
       </div>
+    </section>
+
+    <section class="section" id="arch-amdintel">
+      <h2>AMD & Intel Drivers</h2>
+      <p>Open-source Mesa drivers handle both well out of the box.</p>
+      <pre><code># AMD
+sudo pacman -S mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon
+
+# Intel
+sudo pacman -S mesa lib32-mesa vulkan-intel lib32-vulkan-intel</code></pre>
     </section>
 
     <section class="section" id="arch-media">
       <h2>Video & Codecs</h2>
-      <p>Arch ships most codecs by default, but these fill in gaps for hardware-accelerated
-      playback — useful if you record or stream gameplay.</p>
+      <p>Arch ships most codecs by default, but these fill gaps for hardware-accelerated playback —
+      useful if you record or stream gameplay.</p>
       <pre><code>sudo pacman -S gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav
 sudo pacman -S libva-utils</code></pre>
       <p><strong>NVIDIA users, also run:</strong></p>
@@ -429,19 +613,43 @@ sudo pacman -S libva-utils</code></pre>
     </section>
 
     <section class="section" id="arch-steam">
-      <h2>Steam & Proton-GE</h2>
-      <pre><code>sudo pacman -S steam</code></pre>
-      <p>Most games work out of the box with Steam's built-in Proton.</p>
-      <h3>Proton-GE — for extra compatibility</h3>
-      <p>A community Proton build with extra game-specific fixes. Install via ProtonUp-Qt from the
-      AUR, then select it per-game in Steam → Properties → Compatibility.</p>
-      <pre><code>yay -S protonup-qt</code></pre>
+      <h2>Steam</h2>
+      <div class="app-card">
+        <h4>Steam</h4>
+        <p class="tagline">The main store and launcher for PC gaming on Linux</p>
+        <p>Bundles Proton, Valve's Wine-based compatibility layer. Most games work out of the box
+        once Steam and multilib are set up.</p>
+        <pre><code>sudo pacman -S steam</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="arch-protonplus">
+      <h2>ProtonPlus</h2>
+      <div class="app-card">
+        <h4>ProtonPlus</h4>
+        <p class="tagline">Installs and manages extra Proton, Wine, and DXVK/VKD3D builds</p>
+        <p>Installs and updates community Proton builds — most importantly Proton-GE — from one
+        place, and can set them per-game directly in Steam.</p>
+        <pre><code>yay -S protonplus</code></pre>
+        <h4>Using it</h4>
+        <p>Open ProtonPlus → install a Proton-GE build → in Steam, right-click a game →
+        Properties → Compatibility → tick "Force the use of a specific Steam Play compatibility
+        tool" → select the GE build you installed.</p>
+      </div>
     </section>
 
     <section class="section" id="arch-perf">
       <h2>GameMode & MangoHud</h2>
-      <p><strong>GameMode</strong> auto-tunes CPU/GPU performance while a game runs.
-      <strong>MangoHud</strong> is an FPS/temperature overlay.</p>
+      <div class="app-card">
+        <h4>GameMode</h4>
+        <p class="tagline">Auto-tunes your system for performance while a game runs</p>
+        <p>Switches your CPU governor to performance mode while a game runs, then reverts when
+        you quit.</p>
+      </div>
+      <div class="app-card">
+        <h4>MangoHud</h4>
+        <p class="tagline">On-screen overlay: FPS, CPU/GPU temps, frame times</p>
+      </div>
       <pre><code>sudo pacman -S gamemode lib32-gamemode mangohud lib32-mangohud</code></pre>
       <p>Add to a game's Steam launch options:</p>
       <pre><code>gamemoderun mangohud %command%</code></pre>
@@ -449,9 +657,27 @@ sudo pacman -S libva-utils</code></pre>
 
     <section class="section" id="arch-lutris">
       <h2>Lutris</h2>
-      <p>For Battle.net, Epic, GOG, and emulators — manages Wine prefixes and runs community
-      install scripts.</p>
-      <pre><code>sudo pacman -S lutris</code></pre>
+      <div class="app-card">
+        <h4>Lutris</h4>
+        <p class="tagline">Manages everything Steam doesn't</p>
+        <p>Battle.net, Epic, GOG, older titles, and emulators — manages Wine prefixes and runs
+        community install scripts.</p>
+        <pre><code>sudo pacman -S lutris</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="arch-launchers">
+      <h2>Heroic & Bottles</h2>
+      <div class="app-card">
+        <h4>Heroic Games Launcher</h4>
+        <p class="tagline">Native-feeling launcher for Epic Games Store and GOG</p>
+        <pre><code>yay -S heroic-games-launcher-bin</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>Bottles</h4>
+        <p class="tagline">Isolated Wine "bottles" for individual Windows apps and games</p>
+        <pre><code>flatpak install -y flathub com.usebottles.bottles</code></pre>
+      </div>
     </section>
 
     <section class="section" id="arch-tools">
