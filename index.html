@@ -135,6 +135,7 @@
   <div class="distro-tab active" data-distro="basics">Linux Basics</div>
   <div class="distro-tab" data-distro="fedora">Fedora</div>
   <div class="distro-tab" data-distro="arch">Arch</div>
+  <div class="distro-tab" data-distro="apps">Recommended Apps</div>
 </div>
 
 <!-- ================= BASICS ================= -->
@@ -247,6 +248,165 @@ sudo pacman -Syu</code></pre>
         GPU drivers, which are tied to the exact kernel version.
       </div>
     </section>
+  </main>
+</div>
+
+<!-- ================= RECOMMENDED APPS ================= -->
+<div class="layout distro-pane" id="pane-apps">
+  <nav class="sidebar">
+    <div class="nav-single"><a href="#" data-target="apps-welcome" class="active">Overview</a></div>
+    <div class="nav-single"><a href="#" data-target="apps-gaming">Gaming Extras</a></div>
+    <div class="nav-single"><a href="#" data-target="apps-monitoring">System Monitoring</a></div>
+    <div class="nav-single"><a href="#" data-target="apps-media">Media</a></div>
+    <div class="nav-single"><a href="#" data-target="apps-productivity">Productivity</a></div>
+    <div class="nav-single"><a href="#" data-target="apps-files">Files & Archives</a></div>
+    <a class="support-btn" href="#">☕ Support Me on Ko-fi</a>
+  </nav>
+  <main>
+
+    <section class="section active" id="apps-welcome">
+      <h1>Recommended Apps</h1>
+      <p>A grab-bag of apps worth having on any fresh install, beyond the core gaming stack covered
+      in the Fedora/Arch tabs. Grouped by what you'd actually use them for — install whatever's
+      relevant to you, skip the rest.</p>
+      <div class="callout info">
+        <span class="label">Fedora vs Arch commands</span>
+        Every app card below shows both the <code>dnf</code> and <code>pacman</code>/<code>yay</code>
+        command. Flatpak installs are the same on either distro.
+      </div>
+    </section>
+
+    <section class="section" id="apps-gaming">
+      <h2>Gaming Extras</h2>
+      <p>Beyond Steam/Lutris/ProtonPlus — for specific situations.</p>
+      <div class="app-card">
+        <h4>Gamescope</h4>
+        <p class="tagline">Valve's micro-compositor for resolution/scaling fixes</p>
+        <p>Runs a game in its own mini-compositor with a fixed internal resolution, then scales it
+        to your display. Fixes games that render at the wrong resolution or won't respect your
+        monitor's native one — also what the Steam Deck uses under the hood.</p>
+        <pre><code># Fedora
+sudo dnf install -y gamescope
+
+# Arch
+sudo pacman -S gamescope</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>Protontricks</h4>
+        <p class="tagline">Runs winetricks commands inside a specific game's Proton prefix</p>
+        <p>Some games need a specific DLL, font, or Windows component that isn't installed by
+        default. Protontricks lets you run those <code>winetricks</code> fixes targeted at one
+        game's Proton environment, instead of guessing blind.</p>
+        <pre><code># Fedora
+flatpak install -y flathub com.github.Matoking.protontricks
+
+# Arch
+yay -S protontricks</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="apps-monitoring">
+      <h2>System Monitoring</h2>
+      <div class="app-card">
+        <h4>btop</h4>
+        <p class="tagline">A much nicer terminal system monitor than top/htop</p>
+        <p>Shows CPU, memory, disk, network, and per-process stats with a clean, mouse-clickable
+        terminal UI. Good for spotting what's actually eating resources while a game runs.</p>
+        <pre><code># Fedora
+sudo dnf install -y btop
+
+# Arch
+sudo pacman -S btop</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>GOverlay</h4>
+        <p class="tagline">GUI for configuring MangoHud</p>
+        <p>Instead of hand-editing MangoHud's config file, GOverlay gives you toggles and sliders
+        for what the overlay shows and where — useful once you're past the "just get it working"
+        stage.</p>
+        <pre><code># Fedora
+flatpak install -y flathub io.github.benjamimgois.goverlay
+
+# Arch
+yay -S goverlay</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="apps-media">
+      <h2>Media</h2>
+      <div class="app-card">
+        <h4>VLC</h4>
+        <p class="tagline">Plays almost any video/audio format, no separate codec hunting</p>
+        <p>Good fallback whenever something won't play through your default media app — VLC
+        bundles its own codecs, so it usually works even before you've set up the codec packages
+        in this guide.</p>
+        <pre><code># Fedora
+sudo dnf install -y vlc
+
+# Arch
+sudo pacman -S vlc</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>OBS Studio</h4>
+        <p class="tagline">Screen/gameplay recording and streaming</p>
+        <p>The standard tool for recording gameplay clips or streaming to Twitch/YouTube. Works
+        well alongside MangoHud if you want the overlay visible in recordings.</p>
+        <pre><code># Fedora
+flatpak install -y flathub com.obsproject.Studio
+
+# Arch
+sudo pacman -S obs-studio</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="apps-productivity">
+      <h2>Productivity</h2>
+      <div class="app-card">
+        <h4>GIMP</h4>
+        <p class="tagline">Free, full-featured image editor</p>
+        <pre><code># Fedora
+sudo dnf install -y gimp
+
+# Arch
+sudo pacman -S gimp</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>VS Code / VSCodium</h4>
+        <p class="tagline">Code editor — VSCodium is the same editor without Microsoft's telemetry</p>
+        <pre><code># Fedora (VS Code, via Microsoft's repo) or Flatpak VSCodium:
+flatpak install -y flathub com.vscodium.codium
+
+# Arch (AUR)
+yay -S vscodium-bin</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>Timeshift</h4>
+        <p class="tagline">One-click system snapshots and restore</p>
+        <p>Cheap insurance before a risky change — like installing a new GPU driver. If something
+        breaks, roll back to the last snapshot instead of reinstalling.</p>
+        <pre><code># Fedora
+sudo dnf install -y timeshift
+
+# Arch
+sudo pacman -S timeshift</code></pre>
+      </div>
+      <div class="app-card">
+        <h4>KeePassXC</h4>
+        <p class="tagline">Offline password manager</p>
+        <pre><code># Fedora
+sudo dnf install -y keepassxc
+
+# Arch
+sudo pacman -S keepassxc</code></pre>
+      </div>
+    </section>
+
+    <section class="section" id="apps-files">
+      <h2>Files & Archives</h2>
+      <p>Already covered in the Fedora/Arch Extra Tools pages — <code>p7zip</code> + <code>unrar</code>
+      for archives, and Gearlever for managing AppImages. Nothing extra needed here beyond that.</p>
+    </section>
+
   </main>
 </div>
 
